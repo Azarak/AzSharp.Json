@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azsharp.JsonNode", "Azsharp.JsonNode.csproj", "{FA70C3D5-26BC-4BF1-B8B6-E86BB2C90270}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzSharp.JsonNode", "AzSharp.JsonNode.csproj", "{FA70C3D5-26BC-4BF1-B8B6-E86BB2C90270}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

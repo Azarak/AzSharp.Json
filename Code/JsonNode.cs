@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Azsharp.JsonNode;
+namespace AzSharp.JsonNode;
 
 public class JsonNode
 {

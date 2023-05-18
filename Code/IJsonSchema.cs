@@ -1,5 +1,5 @@
 
-namespace Azsharp.JsonNode;
+namespace AzSharp.JsonNode;
 
 public interface IJsonSchema
 {

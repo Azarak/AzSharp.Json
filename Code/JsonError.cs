@@ -1,4 +1,4 @@
-namespace Azsharp.JsonNode;
+namespace AzSharp.JsonNode;
 public class JsonError
 {
     public enum ErrorType

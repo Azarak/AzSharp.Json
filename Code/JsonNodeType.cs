@@ -1,4 +1,4 @@
-namespace Azsharp.JsonNode;
+namespace AzSharp.JsonNode;
 public enum JsonNodeType
 {
     MISSING,
