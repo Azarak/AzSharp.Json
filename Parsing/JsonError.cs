@@ -1,4 +1,4 @@
-namespace AzSharp.JsonNode;
+namespace AzSharp.Json.Parsing;
 public class JsonError
 {
     public enum ErrorType
@@ -9,7 +9,7 @@ public class JsonError
     public bool mErrored = false;
     public ErrorType mErrorType = ErrorType.IO_ERROR;
     public string mErrorMsg = "";
-    
+
     public void SetError(ErrorType error_type, string error_msg)
     {
         mErrored = true;

@@ -1,4 +1,6 @@
-namespace AzSharp.JsonNode;
+using AzSharp.Json.Parsing;
+
+namespace AzSharp.Json.Serialization;
 
 public interface IJsonSerializable
 {

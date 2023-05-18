@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AzSharp.JsonNode;
+namespace AzSharp.Json.Parsing;
 
 public class JsonNode
 {
@@ -30,7 +30,7 @@ public class JsonNode
     }
 
     private JsonNodeType mType = JsonNodeType.MISSING;
-    private string mString = String.Empty;
+    private string mString = string.Empty;
     private int mInt;
     private float mFloat;
     private bool mBool;
@@ -43,19 +43,19 @@ public class JsonNode
     }
     public bool IsFailed()
     {
-        return (mType == JsonNodeType.FAILED);
+        return mType == JsonNodeType.FAILED;
     }
 
-    public JsonNode(){}
+    public JsonNode() { }
 
     public JsonNode(JsonNode copy)
     {
         SetNodeType(copy.mType, false);
-        switch(mType)
+        switch (mType)
         {
             case JsonNodeType.LIST:
                 List<JsonNode> new_list = new List<JsonNode>();
-                foreach(JsonNode to_copy in copy.AsList())
+                foreach (JsonNode to_copy in copy.AsList())
                 {
                     new_list.Add(new JsonNode(to_copy));
                 }
@@ -63,7 +63,7 @@ public class JsonNode
                 break;
             case JsonNodeType.DICTIONARY:
                 Dictionary<string, JsonNode> neW_dict = new Dictionary<string, JsonNode>();
-                foreach(KeyValuePair<string, JsonNode> pair in copy.AsDict())
+                foreach (KeyValuePair<string, JsonNode> pair in copy.AsDict())
                 {
                     neW_dict.Add(pair.Key, new JsonNode(pair.Value));
                 }
@@ -100,64 +100,64 @@ public class JsonNode
         SetFloat(_floating);
     }
     public JsonNode(bool _boolean)
-    { 
+    {
         SetBool(_boolean);
     }
     public JsonNode(List<JsonNode> _list)
-    { 
+    {
         SetList(_list);
     }
     public JsonNode(Dictionary<string, JsonNode> _dictionary)
-    { 
+    {
         SetDict(_dictionary);
     }
     private void SetNodeType(JsonNodeType new_type, bool set_default_value)
     {
-        if(mType == new_type) { return;}
+        if (mType == new_type) { return; }
         // Null the references to lists or dictionaries to GC them if nessecary.
         mList = null;
         mDictionary = null;
         mType = new_type;
         // Set default values
-        if(set_default_value)
-            switch(mType)
+        if (set_default_value)
+            switch (mType)
             {
                 case JsonNodeType.LIST:
-                {
-                    mList = new List<JsonNode>();
-                    break;
-                }
+                    {
+                        mList = new List<JsonNode>();
+                        break;
+                    }
                 case JsonNodeType.DICTIONARY:
-                {
-                    mDictionary = new Dictionary<string, JsonNode>();
-                    break;
-                }
+                    {
+                        mDictionary = new Dictionary<string, JsonNode>();
+                        break;
+                    }
                 case JsonNodeType.INT:
-                {
-                    mInt = 0;
-                    break;
-                }
+                    {
+                        mInt = 0;
+                        break;
+                    }
                 case JsonNodeType.FLOAT:
-                {
-                    mFloat = 0.0f;
-                    break;
-                }
+                    {
+                        mFloat = 0.0f;
+                        break;
+                    }
                 case JsonNodeType.BOOL:
-                {
-                    mBool = false;
-                    break;
-                }
+                    {
+                        mBool = false;
+                        break;
+                    }
                 case JsonNodeType.STRING:
-                {
-                    mString = "";
-                    break;
-                }
+                    {
+                        mString = "";
+                        break;
+                    }
             }
     }
 
     private void AssertNodeType(JsonNodeType assert_type)
     {
-        if(assert_type == mType)
+        if (assert_type == mType)
         {
             return;
         }
@@ -230,13 +230,13 @@ public class JsonNode
     }
     public void LoadFile(string path, JsonError error)
     {
-        if(!System.IO.File.Exists(path))
+        if (!File.Exists(path))
         {
             Fail(error, JsonError.ErrorType.IO_ERROR, "Failed to find file at path: " + path);
             return;
         }
-        string text = System.IO.File.ReadAllText(path);
-        if(text == null || text.Length == 0)
+        string text = File.ReadAllText(path);
+        if (text == null || text.Length == 0)
         {
             Fail(error, JsonError.ErrorType.IO_ERROR, "Failed to load text from file path: " + path);
             return;
@@ -246,22 +246,22 @@ public class JsonNode
 
     private bool LengthCheck(string text, int index, int len)
     {
-        if(index + len >= text.Length) {return false;}
+        if (index + len >= text.Length) { return false; }
         return true;
     }
 
     public void LoadText(string text, JsonError error, bool treat_whitespace = true)
     {
-        if(treat_whitespace)
+        if (treat_whitespace)
         {
             bool in_string_element = false;
             int i = 0;
             // strip of whitespace in non string elements
-            while(true)
+            while (true)
             {
-                if(i >= text.Length) {break;}
+                if (i >= text.Length) { break; }
                 char iterated_char = text[i];
-                if(iterated_char == '"')
+                if (iterated_char == '"')
                 {
                     in_string_element = !in_string_element;
                 }
@@ -280,54 +280,54 @@ public class JsonNode
     private int BuildNode(string text, int index, JsonError error)
     {
         char first_char = text[index];
-        if(char.IsDigit(first_char))
+        if (char.IsDigit(first_char))
         {
             index = BuildNumber(text, index, error);
         }
-        else 
+        else
         {
-            switch(first_char)
+            switch (first_char)
             {
                 case 't':
-                {
-                    index = BuildBool(text, index, error);
-                    break;
-                }
+                    {
+                        index = BuildBool(text, index, error);
+                        break;
+                    }
                 case 'f':
-                {
-                    index = BuildBool(text, index, error);
-                    break;
-                }
+                    {
+                        index = BuildBool(text, index, error);
+                        break;
+                    }
                 case 'n':
-                {
-                    index = BuildNothing(text, index, error);
-                    break;
-                }
+                    {
+                        index = BuildNothing(text, index, error);
+                        break;
+                    }
                 case '-':
-                {
-                    index = BuildNumber(text, index, error);
-                    break;
-                }
+                    {
+                        index = BuildNumber(text, index, error);
+                        break;
+                    }
                 case '{':
-                {
-                    index = BuildDictionary(text, index, error);
-                    break;
-                }
+                    {
+                        index = BuildDictionary(text, index, error);
+                        break;
+                    }
                 case '[':
-                {
-                    index = BuildList(text, index, error);
-                    break;
-                }
+                    {
+                        index = BuildList(text, index, error);
+                        break;
+                    }
                 case '"':
-                {
-                    index = BuildString(text, index, error);
-                    break;
-                }
+                    {
+                        index = BuildString(text, index, error);
+                        break;
+                    }
                 default:
-                {
-                    Fail(error, JsonError.ErrorType.PARSE_ERROR, "Unable to find a build case while building node");
-                    break;
-                }
+                    {
+                        Fail(error, JsonError.ErrorType.PARSE_ERROR, "Unable to find a build case while building node");
+                        break;
+                    }
             }
         }
         return index;
@@ -338,11 +338,11 @@ public class JsonNode
         bool floaty = false;
         int start_index = index;
         bool outside_number_string = false;
-        while(true)
+        while (true)
         {
-            if(index >= text.Length)
-            { 
-                if(index == start_index)
+            if (index >= text.Length)
+            {
+                if (index == start_index)
                 {
                     Fail(error, JsonError.ErrorType.PARSE_ERROR, "Tried to build a number with no valid characters.");
                     return index;
@@ -350,46 +350,46 @@ public class JsonNode
                 break;
             }
             char cur_char = text[index];
-            if(!char.IsDigit(cur_char))
+            if (!char.IsDigit(cur_char))
             {
-                switch(cur_char)
+                switch (cur_char)
                 {
                     case '-':
-                    {
-                        if(index != start_index)
                         {
-                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Non-front minus character found while building a number.");
-                            return index;
+                            if (index != start_index)
+                            {
+                                Fail(error, JsonError.ErrorType.PARSE_ERROR, "Non-front minus character found while building a number.");
+                                return index;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                     case '.':
-                    {
-                        if(index == start_index)
+                    case '.':
                         {
-                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Front dot character found while building a number.");
-                            return index;
+                            if (index == start_index)
+                            {
+                                Fail(error, JsonError.ErrorType.PARSE_ERROR, "Front dot character found while building a number.");
+                                return index;
+                            }
+                            if (floaty == true)
+                            {
+                                Fail(error, JsonError.ErrorType.PARSE_ERROR, "Multiple dot characters found while building a number.");
+                                return index;
+                            }
+                            floaty = true;
+                            break;
                         }
-                        if(floaty == true)
-                        {
-                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Multiple dot characters found while building a number.");
-                            return index;
-                        }
-                        floaty = true;
-                        break;
-                    }
                     default:
-                    {
-                        outside_number_string = true;
-                        break;
-                    }
+                        {
+                            outside_number_string = true;
+                            break;
+                        }
                 }
             }
-            if(outside_number_string) { break;}
+            if (outside_number_string) { break; }
             index++;
         }
         string substring = text.Substring(start_index, index - start_index);
-        if(floaty)
+        if (floaty)
         {
             SetFloat(float.Parse(substring));
         }
@@ -405,7 +405,7 @@ public class JsonNode
         bool found_any = false;
         const int true_len = 4;
         const int false_len = 5;
-        if(LengthCheck(text, index, true_len) && text.Substring(index, true_len) == "true")
+        if (LengthCheck(text, index, true_len) && text.Substring(index, true_len) == "true")
         {
             bool_value = true;
             found_any = true;
@@ -417,7 +417,7 @@ public class JsonNode
             found_any = true;
             index += false_len;
         }
-        if(!found_any)
+        if (!found_any)
         {
             Fail(error, JsonError.ErrorType.PARSE_ERROR, "Didn't find either a \"true\" or a \"false\" while building a bool value.");
             return index;
@@ -428,7 +428,7 @@ public class JsonNode
     private int BuildNothing(string text, int index, JsonError error)
     {
         const int null_len = 4;
-        if(!(LengthCheck(text, index, null_len) && text.Substring(index, null_len) == "null"))
+        if (!(LengthCheck(text, index, null_len) && text.Substring(index, null_len) == "null"))
         {
             Fail(error, JsonError.ErrorType.PARSE_ERROR, "Didn't find a \"null\" while building a null value.");
             return index;
@@ -443,99 +443,99 @@ public class JsonNode
         bool loop = true;
         string key = "";
         Dictionary<string, JsonNode> built_dictionary = new Dictionary<string, JsonNode>();
-        while(loop)
+        while (loop)
         {
-            if(index >= text.Length)
+            if (index >= text.Length)
             {
                 Fail(error, JsonError.ErrorType.PARSE_ERROR, "Reached end of text while building a dictionary node.");
                 return index;
             }
             char iterated_char = text[index];
-            switch(expect)
+            switch (expect)
             {
                 case DictExpectation.OPEN_BRACKET:
-                {
-                    if(iterated_char != '{')
                     {
-                        Fail(error, JsonError.ErrorType.PARSE_ERROR, "Tried to build a dictionary without an open bracket at the start.");
-                        return index;
-                    }
-                    index++;
-                    expect = DictExpectation.KEY_OR_CLOSED_BRACKET; 
-                    break;
-                }
-                case DictExpectation.KEY_OR_CLOSED_BRACKET:
-                {
-                    if(iterated_char == '}')
-                    {
-                        loop = false;
-                        index++;
-                    }
-                    else if (iterated_char == '"')
-                    {
-                        TextParseReturn parsed = ParseText(text, index, error);
-                        index = parsed.mIndex;
-                        if(error.Errored())
+                        if (iterated_char != '{')
                         {
+                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Tried to build a dictionary without an open bracket at the start.");
                             return index;
                         }
-                        key = parsed.mString;
-                        expect = DictExpectation.SEMICOLON; 
+                        index++;
+                        expect = DictExpectation.KEY_OR_CLOSED_BRACKET;
+                        break;
                     }
-                    else
+                case DictExpectation.KEY_OR_CLOSED_BRACKET:
                     {
-                        Fail(error, JsonError.ErrorType.PARSE_ERROR, "Unhandled character while expecting a key start or dictionary close bracket.");
-                        return index; 
-                    }
-                    break;
-                }
-                case DictExpectation.SEMICOLON:
-                {
-                    if(iterated_char != ':')
-                    {
-                        Fail(error, JsonError.ErrorType.PARSE_ERROR, "Expected semicolon while parsing a dictionary, didnt get one.");
-                        return index;
-                    }
-                    expect = DictExpectation.ELEMENT;
-                    index++;
-                    break;
-                }
-                case DictExpectation.ELEMENT:
-                {
-                    JsonNode new_node = new JsonNode();
-                    index = new_node.BuildNode(text, index, error);
-                    if(error.Errored())
-                    {
-                        return index;
-                    }
-                    built_dictionary[key] = new_node;
-                    expect = DictExpectation.COMMA_OR_CLOSED_BRACKET;
-                    break;
-                }
-                case DictExpectation.COMMA_OR_CLOSED_BRACKET:
-                {
-                    switch(iterated_char)
-                    {
-                        case ',':
-                        {
-                            index++;
-                            expect = DictExpectation.KEY_OR_CLOSED_BRACKET;
-                            break;
-                        }
-                        case '}':
+                        if (iterated_char == '}')
                         {
                             loop = false;
                             index++;
-                            break;
                         }
-                        default:
+                        else if (iterated_char == '"')
                         {
-                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Didn't get a comma or a closed bracket when expecting one during dictionary building. Instead got at index of ");
+                            TextParseReturn parsed = ParseText(text, index, error);
+                            index = parsed.mIndex;
+                            if (error.Errored())
+                            {
+                                return index;
+                            }
+                            key = parsed.mString;
+                            expect = DictExpectation.SEMICOLON;
+                        }
+                        else
+                        {
+                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Unhandled character while expecting a key start or dictionary close bracket.");
                             return index;
                         }
+                        break;
                     }
-                    break;
-                }
+                case DictExpectation.SEMICOLON:
+                    {
+                        if (iterated_char != ':')
+                        {
+                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Expected semicolon while parsing a dictionary, didnt get one.");
+                            return index;
+                        }
+                        expect = DictExpectation.ELEMENT;
+                        index++;
+                        break;
+                    }
+                case DictExpectation.ELEMENT:
+                    {
+                        JsonNode new_node = new JsonNode();
+                        index = new_node.BuildNode(text, index, error);
+                        if (error.Errored())
+                        {
+                            return index;
+                        }
+                        built_dictionary[key] = new_node;
+                        expect = DictExpectation.COMMA_OR_CLOSED_BRACKET;
+                        break;
+                    }
+                case DictExpectation.COMMA_OR_CLOSED_BRACKET:
+                    {
+                        switch (iterated_char)
+                        {
+                            case ',':
+                                {
+                                    index++;
+                                    expect = DictExpectation.KEY_OR_CLOSED_BRACKET;
+                                    break;
+                                }
+                            case '}':
+                                {
+                                    loop = false;
+                                    index++;
+                                    break;
+                                }
+                            default:
+                                {
+                                    Fail(error, JsonError.ErrorType.PARSE_ERROR, "Didn't get a comma or a closed bracket when expecting one during dictionary building. Instead got at index of ");
+                                    return index;
+                                }
+                        }
+                        break;
+                    }
             }
         }
         SetDict(built_dictionary);
@@ -546,70 +546,70 @@ public class JsonNode
         ListExpectation expect = ListExpectation.OPEN_BRACKET;
         bool loop = true;
         List<JsonNode> built_nodes = new List<JsonNode>();
-        while(loop)
+        while (loop)
         {
-            if(index >= text.Length)
+            if (index >= text.Length)
             {
                 Fail(error, JsonError.ErrorType.PARSE_ERROR, "Reached end of text while building a list node.");
                 return index;
             }
             char iterated_char = text[index];
-            switch(expect)
+            switch (expect)
             {
                 case ListExpectation.OPEN_BRACKET:
-                {
-                    if(iterated_char != '[')
                     {
-                        Fail(error, JsonError.ErrorType.PARSE_ERROR, "Tried to build a list that doesn't start with open bracket.");
-                        return index;
-                    }
-                    expect = ListExpectation.ELEMENT_OR_CLOSED_BRACKET;
-                    index++;
-                    break;
-                }
-                case ListExpectation.ELEMENT_OR_CLOSED_BRACKET:
-                {
-                    if(iterated_char == ']')
-                    {
-                        loop = false;
-                        index++;
-                    }
-                    else
-                    {
-                        JsonNode new_node = new JsonNode();
-                        index = new_node.BuildNode(text, index, error);
-                        if(error.Errored())
+                        if (iterated_char != '[')
                         {
+                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Tried to build a list that doesn't start with open bracket.");
                             return index;
                         }
-                        built_nodes.Add(new_node);
-                        expect = ListExpectation.COMMA_OR_CLOSED_BRACKET;
+                        expect = ListExpectation.ELEMENT_OR_CLOSED_BRACKET;
+                        index++;
+                        break;
                     }
-                    break;
-                }
-                case ListExpectation.COMMA_OR_CLOSED_BRACKET:
-                {
-                    switch(iterated_char)
+                case ListExpectation.ELEMENT_OR_CLOSED_BRACKET:
                     {
-                        case ',':
-                        {
-                            expect = ListExpectation.ELEMENT_OR_CLOSED_BRACKET;
-                            break;
-                        }
-                        case ']':
+                        if (iterated_char == ']')
                         {
                             loop = false;
-                            break;
+                            index++;
                         }
-                        default:
+                        else
                         {
-                            Fail(error, JsonError.ErrorType.PARSE_ERROR, "Didn't find a comma or a close bracket after an element in built list.");
-                            return index;
+                            JsonNode new_node = new JsonNode();
+                            index = new_node.BuildNode(text, index, error);
+                            if (error.Errored())
+                            {
+                                return index;
+                            }
+                            built_nodes.Add(new_node);
+                            expect = ListExpectation.COMMA_OR_CLOSED_BRACKET;
                         }
+                        break;
                     }
-                    index++;
-                    break;
-                }
+                case ListExpectation.COMMA_OR_CLOSED_BRACKET:
+                    {
+                        switch (iterated_char)
+                        {
+                            case ',':
+                                {
+                                    expect = ListExpectation.ELEMENT_OR_CLOSED_BRACKET;
+                                    break;
+                                }
+                            case ']':
+                                {
+                                    loop = false;
+                                    break;
+                                }
+                            default:
+                                {
+                                    Fail(error, JsonError.ErrorType.PARSE_ERROR, "Didn't find a comma or a close bracket after an element in built list.");
+                                    return index;
+                                }
+                        }
+                        index++;
+                        break;
+                    }
             }
         }
         SetList(built_nodes);
@@ -618,7 +618,7 @@ public class JsonNode
     private int BuildString(string text, int index, JsonError error)
     {
         TextParseReturn parsed = ParseText(text, index, error);
-        if(error.Errored())
+        if (error.Errored())
         {
             return parsed.mIndex;
         }
@@ -635,75 +635,75 @@ public class JsonNode
         string escaped_string = "";
         int index = 0;
         bool escaped_char = false;
-        while(true)
+        while (true)
         {
-            if(index >= to_escape.Length)
+            if (index >= to_escape.Length)
             {
                 break;
             }
             char iterated_char = to_escape[index];
             // Process an escaped character.
-            if(escaped_char)
+            if (escaped_char)
             {
-                switch(iterated_char)
+                switch (iterated_char)
                 {
                     case 'b':
-                    {
-                        escaped_string += '\b';
-                        break;
-                    }
+                        {
+                            escaped_string += '\b';
+                            break;
+                        }
                     case 'f':
-                    {
-                        escaped_string += '\f';
-                        break;
-                    }
+                        {
+                            escaped_string += '\f';
+                            break;
+                        }
                     case 'n':
-                    {
-                        escaped_string += '\n';
-                        break;
-                    }
+                        {
+                            escaped_string += '\n';
+                            break;
+                        }
                     case 'r':
-                    {
-                        escaped_string += '\r';
-                        break;
-                    }
+                        {
+                            escaped_string += '\r';
+                            break;
+                        }
                     case 't':
-                    {
-                        escaped_string += '\t';
-                        break;
-                    }
+                        {
+                            escaped_string += '\t';
+                            break;
+                        }
                     case '"':
-                    {
-                        escaped_string += '\"';
-                        break;
-                    }
+                        {
+                            escaped_string += '\"';
+                            break;
+                        }
                     case '\\':
-                    {
-                        escaped_string += '\\';
-                        break;
-                    }
+                        {
+                            escaped_string += '\\';
+                            break;
+                        }
                     default:
-                    {
-                        break;
-                    }
+                        {
+                            break;
+                        }
                 }
                 escaped_char = false;
             }
             // Process an unescaped character.
             else
             {
-                switch(iterated_char)
+                switch (iterated_char)
                 {
                     case '\\':
-                    {
-                        escaped_char = true;
-                        break;
-                    }
+                        {
+                            escaped_char = true;
+                            break;
+                        }
                     default:
-                    {
-                        escaped_string += iterated_char;
-                        break;
-                    }
+                        {
+                            escaped_string += iterated_char;
+                            break;
+                        }
                 }
             }
             index++;
@@ -716,50 +716,50 @@ public class JsonNode
         TextParseReturn parse_return = new TextParseReturn("", index);
         int quotations = 0;
         bool escape = false;
-        while(true)
+        while (true)
         {
-            if(parse_return.mIndex >= text.Length)
+            if (parse_return.mIndex >= text.Length)
             {
                 Fail(error, JsonError.ErrorType.PARSE_ERROR, "Reached end of text while parsing text.");
                 return parse_return;
             }
             char iterated_char = text[parse_return.mIndex];
             // If an unescaped non-quotations character is not inbetween the first and second quotation.
-            if(iterated_char != '"' && quotations != 1 && escape == false)
+            if (iterated_char != '"' && quotations != 1 && escape == false)
             {
                 Fail(error, JsonError.ErrorType.PARSE_ERROR, "Tried to parse an unescaped non-quotation character outside of quotations while building a string node.");
                 return parse_return;
             }
-            switch(iterated_char)
+            switch (iterated_char)
             {
                 case '"':
-                {
-                    if(escape)
+                    {
+                        if (escape)
+                        {
+                            escape = false;
+                            parse_return.mString += iterated_char;
+                        }
+                        else
+                        {
+                            quotations++;
+                        }
+                        break;
+                    }
+                case '\\':
+                    {
+                        escape = true;
+                        parse_return.mString += iterated_char;
+                        break;
+                    }
+                default:
                     {
                         escape = false;
                         parse_return.mString += iterated_char;
+                        break;
                     }
-                    else 
-                    {
-                        quotations++;
-                    }
-                    break;
-                }
-                case '\\':
-                {
-                    escape = true;
-                    parse_return.mString += iterated_char;
-                    break;
-                }
-                default:
-                {
-                    escape = false;
-                    parse_return.mString += iterated_char;
-                    break;
-                }
             }
             parse_return.mIndex++;
-            if(quotations >= 2) { break;}
+            if (quotations >= 2) { break; }
         }
         parse_return.mString = EscapeString(parse_return.mString);
         return parse_return;
@@ -770,52 +770,52 @@ public class JsonNode
         string passed_string = "";
         //Unescape characters.
         int index = 0;
-        while(true)
+        while (true)
         {
-            if(index >= to_unescape.Length){break;}
+            if (index >= to_unescape.Length) { break; }
             char string_char = to_unescape[index];
-            switch(string_char)
+            switch (string_char)
             {
                 case '\b':
-                {
-                    passed_string += "\\b";
-                    break;
-                }
+                    {
+                        passed_string += "\\b";
+                        break;
+                    }
                 case '\f':
-                {
-                    passed_string += "\\f";
-                    break;
-                }
+                    {
+                        passed_string += "\\f";
+                        break;
+                    }
                 case '\n':
-                {
-                    passed_string += "\\n";
-                    break;
-                }
+                    {
+                        passed_string += "\\n";
+                        break;
+                    }
                 case '\r':
-                {
-                    passed_string += "\\r";
-                    break;
-                }
+                    {
+                        passed_string += "\\r";
+                        break;
+                    }
                 case '\t':
-                {
-                    passed_string += "\\t";
-                    break;
-                }
+                    {
+                        passed_string += "\\t";
+                        break;
+                    }
                 case '\"':
-                {
-                    passed_string += "\\\"";
-                    break;
-                }
+                    {
+                        passed_string += "\\\"";
+                        break;
+                    }
                 case '\\':
-                {
-                    passed_string += "\\";
-                    break;
-                }
+                    {
+                        passed_string += "\\";
+                        break;
+                    }
                 default:
-                {
-                    passed_string += string_char;
-                    break;
-                }
+                    {
+                        passed_string += string_char;
+                        break;
+                    }
             }
             index++;
         }
@@ -825,7 +825,7 @@ public class JsonNode
     private string StringTabs(int amount)
     {
         string tabs = "";
-        for(int i = 0; i < amount; i++)
+        for (int i = 0; i < amount; i++)
         {
             tabs += '\t';
         }
@@ -833,49 +833,49 @@ public class JsonNode
     }
 
     public string TurnIntoText(int tabs, bool make_indents, bool inlist)
+    {
+        string return_string = "";
+        switch (mType)
         {
-            string return_string = "";
-            switch(mType)
-            {
-                case JsonNodeType.MISSING:
+            case JsonNodeType.MISSING:
                 {
                     return_string = "MISSING";
                     break;
                 }
-                case JsonNodeType.FAILED:
+            case JsonNodeType.FAILED:
                 {
                     return_string = "FAILED";
                     break;
                 }
-                case JsonNodeType.NOTHING:
+            case JsonNodeType.NOTHING:
                 {
                     return_string = "null";
                     break;
                 }
-                case JsonNodeType.DICTIONARY:
+            case JsonNodeType.DICTIONARY:
                 {
-                    if(make_indents && !inlist)
+                    if (make_indents && !inlist)
                     {
-                        if(tabs != 0 ) {return_string += '\n';}
+                        if (tabs != 0) { return_string += '\n'; }
                         return_string += StringTabs(tabs);
                     }
                     return_string += "{";
                     tabs++;
-                    foreach(var pair in mDictionary)
+                    foreach (var pair in mDictionary)
                     {
-                        if(make_indents) 
+                        if (make_indents)
                         {
                             return_string += '\n';
                             return_string += StringTabs(tabs);
                         }
                         return_string += UnescapeAndQuoteString(pair.Key);
                         return_string += ":";
-                        if(make_indents) { return_string += " ";}
+                        if (make_indents) { return_string += " "; }
                         return_string += pair.Value.TurnIntoText(tabs, make_indents, false);
                         return_string += ",";
                     }
                     tabs--;
-                    if(make_indents) 
+                    if (make_indents)
                     {
                         return_string += '\n';
                         return_string += StringTabs(tabs);
@@ -883,18 +883,18 @@ public class JsonNode
                     return_string += "}";
                     break;
                 }
-                case JsonNodeType.LIST:
+            case JsonNodeType.LIST:
                 {
-                    if(make_indents && !inlist)
+                    if (make_indents && !inlist)
                     {
-                        if(tabs != 0 ) {return_string += '\n';}
+                        if (tabs != 0) { return_string += '\n'; }
                         return_string += StringTabs(tabs);
                     }
                     return_string += "[";
                     tabs++;
-                    foreach(var list_node in mList)
+                    foreach (var list_node in mList)
                     {
-                        if(make_indents) 
+                        if (make_indents)
                         {
                             return_string += '\n';
                             return_string += StringTabs(tabs);
@@ -903,32 +903,32 @@ public class JsonNode
                         return_string += ",";
                     }
                     tabs--;
-                    if(make_indents) 
+                    if (make_indents)
                     {
                         return_string += '\n';
                         return_string += StringTabs(tabs);
                     }
                     return_string += "]";
                     break;
-                    }
-                case JsonNodeType.STRING:
+                }
+            case JsonNodeType.STRING:
                 {
                     return_string = UnescapeAndQuoteString(mString);
                     break;
                 }
-                case JsonNodeType.INT:
+            case JsonNodeType.INT:
                 {
                     return_string = mInt.ToString();
                     break;
                 }
-                case JsonNodeType.FLOAT:
+            case JsonNodeType.FLOAT:
                 {
                     return_string = mFloat.ToString("0.00");
                     break;
                 }
-                case JsonNodeType.BOOL:
+            case JsonNodeType.BOOL:
                 {
-                    if(mBool == true)
+                    if (mBool == true)
                     {
                         return_string = "true";
                     }
@@ -938,9 +938,9 @@ public class JsonNode
                     }
                     break;
                 }
-            }
-            return return_string;
         }
+        return return_string;
+    }
 
     public string ToText(bool make_indents)
     {
@@ -948,6 +948,6 @@ public class JsonNode
     }
     public void SaveFile(string path, bool make_indents = true)
     {
-        System.IO.File.WriteAllText(path, ToText(make_indents));
+        File.WriteAllText(path, ToText(make_indents));
     }
 }
