@@ -808,7 +808,7 @@ public class JsonNode
                     }
                 case '\\':
                     {
-                        passed_string += "\\";
+                        passed_string += "\\\\";
                         break;
                     }
                 default:
